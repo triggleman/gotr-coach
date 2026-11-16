@@ -346,7 +346,16 @@ public class Pathfinder
 	 */
 	public List<WorldPoint> simplify(List<WorldPoint> path)
 	{
-		if (!ready || path.size() < 3)
+		return simplify(path, Integer.MAX_VALUE);
+	}
+
+	/**
+	 * Like {@link #simplify(List)}, but no straight leg spans more than maxLeg tiles of the route,
+	 * so the line keeps following the walk with regular bends. maxLeg 1 keeps every tile.
+	 */
+	public List<WorldPoint> simplify(List<WorldPoint> path, int maxLeg)
+	{
+		if (!ready || path.size() < 3 || maxLeg <= 1)
 		{
 			return path;
 		}
@@ -356,7 +365,8 @@ public class Pathfinder
 		while (anchor < path.size() - 1)
 		{
 			int next = anchor + 1;
-			for (int j = path.size() - 1; j > anchor + 1; j--)
+			int far = (int) Math.min(path.size() - 1, (long) anchor + maxLeg);
+			for (int j = far; j > anchor + 1; j--)
 			{
 				if (clearLine(path.get(anchor), path.get(j)))
 				{

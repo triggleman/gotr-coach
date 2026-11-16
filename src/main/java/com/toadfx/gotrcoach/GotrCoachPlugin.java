@@ -686,14 +686,14 @@ public class GotrCoachPlugin extends Plugin
 		if (targetObject != null)
 		{
 			pathTiles = pathfinder.pathTo(targetObject);
-			path = pathfinder.simplify(pathTiles);
+			path = pathfinder.simplify(pathTiles, config.pathLeg());
 			targetTicks = pathfinder.ticksTo(targetObject);
 		}
 		else if (targetNpc != null)
 		{
 			int size = npcSize(targetNpc);
 			pathTiles = pathfinder.pathToArea(targetNpc.getWorldLocation(), size);
-			path = pathfinder.simplify(pathTiles);
+			path = pathfinder.simplify(pathTiles, config.pathLeg());
 			targetTicks = pathfinder.ticksToArea(targetNpc.getWorldLocation(), size);
 		}
 		else
