@@ -1,4 +1,4 @@
-<p align="center"><img src="logo.png" width="220" alt="GOTR Coach logo"></p>
+<p align="center"><img src="banner.png" alt="GOTR Coach: your Guardians of the Rift companion"></p>
 
 # GOTR Coach
 
