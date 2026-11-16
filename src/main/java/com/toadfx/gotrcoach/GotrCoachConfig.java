@@ -127,6 +127,14 @@ public interface GotrCoachConfig extends Config
 		return 10;
 	}
 
+	@ConfigItem(keyName = "topUpMin", name = "Top up only if room for", position = 5, section = strategySection,
+		description = "Go back to the workbench to fill up only if at least this much more essence fits. Smaller gaps go straight to the altar")
+	@Range(min = 1, max = 30)
+	default int topUpMin()
+	{
+		return 5;
+	}
+
 	@ConfigItem(keyName = "guardiansWanted", name = "Guardians wanted", position = 6, section = strategySection,
 		description = "Build guardians until this many are up, then put cells on barriers (solo always uses 2)")
 	@Range(max = 10)

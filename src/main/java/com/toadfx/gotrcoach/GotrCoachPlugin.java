@@ -594,6 +594,7 @@ public class GotrCoachPlugin extends Plugin
 		p.craftLeadSeconds = config.craftLeadSeconds();
 		p.massFirstTripEssence = config.massFirstTripEssence();
 		p.minEssenceForAltar = config.minEssenceForAltar();
+		p.topUpMin = config.topUpMin();
 		p.guardiansWanted = config.guardiansWanted();
 		p.maxImbalance = config.maxImbalance();
 		p.balanceWithBanked = config.balanceWithBanked();

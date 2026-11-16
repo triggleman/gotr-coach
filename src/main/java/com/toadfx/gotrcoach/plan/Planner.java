@@ -214,7 +214,10 @@ public final class Planner
 		if (s.fragments > 0 && s.essenceRoom() > 0)
 		{
 			int goal = essenceGoal(s, st);
-			if (s.essenceCarried() < goal)
+			// Topping up a nearly full load isn't worth the walk (e.g. 2 slots after the portal),
+			// and never worth losing the altar to a rotation.
+			boolean worthIt = s.essenceCarried() == 0 || goal - s.essenceCarried() >= st.topUpMin;
+			if (s.essenceCarried() < goal && worthIt && !rotationRush(s, st))
 			{
 				return Instruction.of(Step.CRAFT_ESSENCE, Target.WORKBENCH,
 					s.essenceCarried() + " / " + goal + " essence");
@@ -336,6 +339,33 @@ public final class Planner
 	}
 
 	// ---------------------------------------------------------------- helpers
+
+	/** Running ticks a chisel run of this many essence roughly takes (about one essence per two ticks). */
+	static final int TICKS_PER_ESSENCE = 2;
+
+	/**
+	 * True when you already carry a worthwhile load and stopping to chisel more would mean the best
+	 * altar rotates before you get there, while going now still makes it.
+	 */
+	static boolean rotationRush(Snapshot s, PlannerSettings st)
+	{
+		if (s.essenceCarried() < st.minEssenceForAltar || s.altarTicksLeft < 0)
+		{
+			return false;
+		}
+		AltarChooser.Choice choice = AltarChooser.choose(s, st);
+		if (choice == null || choice.viaTalisman)
+		{
+			return false;
+		}
+		Integer travel = s.altarTravelTicks.get(choice.primary);
+		if (travel == null || travel < 0 || travel > s.altarTicksLeft)
+		{
+			return false;
+		}
+		int craftTicks = Math.min(60, (essenceGoal(s, st) - s.essenceCarried()) * TICKS_PER_ESSENCE);
+		return travel + craftTicks > s.altarTicksLeft;
+	}
 
 	/** A portal is expected shortly and there's room to make it worth waiting for. */
 	static boolean portalDueSoon(Snapshot s, PlannerSettings st)

@@ -462,4 +462,45 @@ public class PlannerTest
 		s.essenceInPouches = 0;
 		assertEquals(Step.ENTER_ALTAR, Planner.plan(s, off).getStep());
 	}
+
+	@Test
+	public void smallTopUpGoesStraightToTheAltar()
+	{
+		// The screenshot case: 22 essence, 2 free slots, 121 fragments after the portal.
+		Snapshot s = crafting();
+		s.hasPouches = false;
+		s.pouchCapacity = 0;
+		s.essence = 22;
+		s.freeSlots = 2;
+		s.fragments = 121;
+		assertEquals(Step.ENTER_ALTAR, Planner.plan(s, team()).getStep());
+
+		// Lots of room left: still worth filling up.
+		s.essence = 10;
+		s.freeSlots = 14;
+		assertEquals(Step.CRAFT_ESSENCE, Planner.plan(s, team()).getStep());
+	}
+
+	@Test
+	public void goNowIfCraftingWouldMissTheRotation()
+	{
+		Snapshot s = crafting();
+		s.hasPouches = false;
+		s.pouchCapacity = 0;
+		s.essence = 14;
+		s.freeSlots = 14;
+		s.fragments = 80;
+		s.altarTicksLeft = 17;
+		s.altarTravelTicks.put(Altar.WATER, 8);
+		s.altarTravelTicks.put(Altar.NATURE, 9);
+		assertEquals("14 more essence (~28 ticks) would miss it", Step.ENTER_ALTAR, Planner.plan(s, team()).getStep());
+
+		// Plenty of time before the rotation: fill up first.
+		s.altarTicksLeft = 90;
+		assertEquals(Step.CRAFT_ESSENCE, Planner.plan(s, team()).getStep());
+
+		// Too late either way: keep crafting for the next pair rather than running for nothing.
+		s.altarTicksLeft = 5;
+		assertEquals(Step.CRAFT_ESSENCE, Planner.plan(s, team()).getStep());
+	}
 }

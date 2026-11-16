@@ -11,6 +11,8 @@ public class PlannerSettings
 	public int craftLeadSeconds = -1;
 	/** On mass worlds, chisel only this much essence for the first altar trip (wiki: 30). */
 	public int massFirstTripEssence = 30;
+	/** Only go back to the workbench to top up if at least this much more essence fits. */
+	public int topUpMin = 5;
 	/** Smallest load worth an altar trip. */
 	public int minEssenceForAltar = 10;
 	/** Guardians you want up before you put cells into barriers instead. */
