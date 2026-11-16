@@ -6,6 +6,22 @@ A Guardians of the Rift plugin for RuneLite. It tells you the next thing to do, 
 
 It only shows information. It never clicks or acts for you.
 
+## Screenshots
+
+**Heading to an altar.** The guide line follows your walk. The open altars show their rune and timer, the timeline bar sits on top, and the side panel and info panel show the round.
+
+![Heading to the Cosmic altar](docs/screenshots/altar-step.jpg)
+
+**Portal first.** When a portal opens, the step, path and countdown all turn red.
+
+![Portal open with the red path and countdown](docs/screenshots/portal-open.jpg)
+
+**Inside the huge remains.** It tells you how much room is left, and the countdown shows how long the portal stays open.
+
+![Mining in the huge remains](docs/screenshots/huge-remains.jpg)
+
+![Portal closing countdown while mining](docs/screenshots/portal-closing.jpg)
+
 ## Features
 
 **Step guidance**
