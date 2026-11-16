@@ -8,6 +8,14 @@ It only shows information. It never clicks or acts for you.
 
 ## Screenshots
 
+**Mining phase.** The timeline counts down to when you should stop mining, and the goal bar tracks your opening fragments.
+
+![Mining phase with the timeline countdown](docs/screenshots/mining-phase.jpg)
+
+**Rubble shortcut.** With 56 Agility the route uses the rubble, drawn dashed, on the way back to the workbench.
+
+![Dashed line over the rubble shortcut](docs/screenshots/rubble-shortcut.jpg)
+
 **Heading to an altar.** The guide line follows your walk. The open altars show their rune and timer, the timeline bar sits on top, and the side panel and info panel show the round.
 
 ![Heading to the Cosmic altar](docs/screenshots/altar-step.jpg)
