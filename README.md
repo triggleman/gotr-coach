@@ -22,6 +22,16 @@ It only shows information. It never clicks or acts for you.
 
 ![Portal closing countdown while mining](docs/screenshots/portal-closing.jpg)
 
+**Side panel and settings.** A sidebar tab with the next step, the round, your points, quick settings, your last grade and history. Everything is adjustable.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/side-panel.png" width="230" alt="GOTR Coach side panel"><br><sub>Side panel</sub></td>
+    <td align="center"><img src="docs/screenshots/settings-strategy.png" width="230" alt="Strategy and guidance settings"><br><sub>Strategy settings</sub></td>
+    <td align="center"><img src="docs/screenshots/settings-guidance.png" width="230" alt="Guidance and altar settings"><br><sub>Guidance and altar settings</sub></td>
+  </tr>
+</table>
+
 ## Features
 
 **Step guidance**
