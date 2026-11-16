@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.PriorityQueue;
 import net.runelite.api.CollisionData;
 import net.runelite.api.CollisionDataFlag;
 import net.runelite.api.GameObject;
@@ -37,6 +36,12 @@ public class Pathfinder
 	/** How far out to look for a standing tile when nothing next to the target is walkable. */
 	private static final int MAX_REACH_RING = 5;
 
+	/** The order the game's own pathfinding checks neighbours in. */
+	private static final int[][] GAME_ORDER = {
+		{-1, 0}, {1, 0}, {0, -1}, {0, 1}, {-1, -1}, {1, -1}, {-1, 1}, {1, 1}
+	};
+
+	private java.util.List<java.util.ArrayDeque<Integer>> bucket;
 	private int baseX;
 	private int baseY;
 	private int plane;
@@ -89,50 +94,68 @@ public class Pathfinder
 		int shortA = shortcutA == null ? -1 : index(shortcutA.getX() - baseX, shortcutA.getY() - baseY);
 		int shortB = shortcutB == null ? -1 : index(shortcutB.getX() - baseX, shortcutB.getY() - baseY);
 
-		PriorityQueue<int[]> queue = new PriorityQueue<>((a, b) -> Integer.compare(a[0], b[0]));
+		// Breadth-first, first visit wins, neighbours in the game's own order (W, E, S, N, SW, SE, NW, NE),
+		// so equally short routes break the same way the client walks them and the line matches your steps.
+		// Buckets by distance keep that order while letting the rubble climb cost more than one step.
+		int buckets = MAX_COST + SHORTCUT_COST + 2;
+		if (bucket == null || bucket.size() != buckets)
+		{
+			bucket = new ArrayList<>(buckets);
+			for (int i = 0; i < buckets; i++)
+			{
+				bucket.add(new java.util.ArrayDeque<>());
+			}
+		}
+		else
+		{
+			for (java.util.ArrayDeque<Integer> q : bucket)
+			{
+				q.clear();
+			}
+		}
 		int startIdx = index(sx, sy);
 		dist[startIdx] = 0;
-		queue.add(new int[]{0, startIdx});
-		while (!queue.isEmpty())
+		bucket.get(0).add(startIdx);
+		for (int d = 0; d <= MAX_COST; d++)
 		{
-			int[] head = queue.poll();
-			int d = head[0];
-			int idx = head[1];
-			if (d > dist[idx] || d > MAX_COST)
+			java.util.ArrayDeque<Integer> q = bucket.get(d);
+			while (!q.isEmpty())
 			{
-				continue;
-			}
-			int x = idx / sizeY;
-			int y = idx % sizeY;
-			for (int dx = -1; dx <= 1; dx++)
-			{
-				for (int dy = -1; dy <= 1; dy++)
+				int idx = q.poll();
+				if (dist[idx] != d)
 				{
-					if ((dx != 0 || dy != 0) && canMove(x, y, dx, dy))
+					continue;
+				}
+				int x = idx / sizeY;
+				int y = idx % sizeY;
+				for (int[] dir : GAME_ORDER)
+				{
+					if (canMove(x, y, dir[0], dir[1]))
 					{
-						relax(queue, idx, index(x + dx, y + dy), d + 1);
+						visit(idx, index(x + dir[0], y + dir[1]), d + 1);
 					}
 				}
-			}
-			if (idx == shortA && shortB >= 0)
-			{
-				relax(queue, idx, shortB, d + SHORTCUT_COST);
-			}
-			else if (idx == shortB && shortA >= 0)
-			{
-				relax(queue, idx, shortA, d + SHORTCUT_COST);
+				if (idx == shortA && shortB >= 0)
+				{
+					visit(idx, shortB, d + SHORTCUT_COST);
+				}
+				else if (idx == shortB && shortA >= 0)
+				{
+					visit(idx, shortA, d + SHORTCUT_COST);
+				}
 			}
 		}
 		ready = true;
 	}
 
-	private void relax(PriorityQueue<int[]> queue, int from, int to, int cost)
+	/** Only a strictly shorter route replaces the first one found, so the game's tie order holds. */
+	private void visit(int from, int to, int cost)
 	{
-		if (to >= 0 && cost < dist[to])
+		if (to >= 0 && cost < dist[to] && cost < bucket.size())
 		{
 			dist[to] = cost;
 			prev[to] = from;
-			queue.add(new int[]{cost, to});
+			bucket.get(cost).add(to);
 		}
 	}
 

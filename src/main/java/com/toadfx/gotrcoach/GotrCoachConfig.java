@@ -235,12 +235,12 @@ public interface GotrCoachConfig extends Config
 	}
 
 	@ConfigItem(keyName = "pathLeg", name = "Path detail", position = 2, section = guidanceSection,
-		description = "Longest straight stretch of the line, in tiles. Lower follows your walk more closely with more bends; 1 = every tile")
+		description = "1 = every tile of your walk (smoothest, like the game's own route). Higher merges tiles into longer straight stretches")
 	@Range(min = 1, max = 30)
 	@Units(" tiles")
 	default int pathLeg()
 	{
-		return 4;
+		return 1;
 	}
 
 	@ConfigItem(keyName = "roundCorners", name = "Rounded corners", position = 3, section = guidanceSection,
