@@ -27,7 +27,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import net.runelite.client.config.ConfigManager;
@@ -62,6 +65,9 @@ public class GotrCoachPanel extends PluginPanel
 	private final JComboBox<Strategy> strategyBox = new JComboBox<>(Strategy.values());
 	private final JComboBox<AltarMode> altarBox = new JComboBox<>(AltarMode.values());
 	private final JComboBox<GotrCoachConfig.PortalPriority> portalBox = new JComboBox<>(GotrCoachConfig.PortalPriority.values());
+	private final JSpinner fragmentsSpinner = new JSpinner(new SpinnerNumberModel(120, 10, 300, 5));
+	private final JButton fragmentsAuto = new JButton("Auto");
+	private final JLabel fragmentsNote = new JLabel();
 	private final JCheckBox depositBox = new JCheckBox("Deposit runes step");
 	private final JCheckBox graceBox = new JCheckBox("Grace portal hold");
 	private boolean syncing;
@@ -190,6 +196,12 @@ public class GotrCoachPanel extends PluginPanel
 		p.add(Box.createVerticalStrut(4));
 		p.add(labelled("Portal", portalBox));
 		p.add(Box.createVerticalStrut(4));
+		p.add(fragmentsRow());
+		fragmentsNote.setFont(FontManager.getRunescapeSmallFont());
+		fragmentsNote.setForeground(MUTED);
+		fragmentsNote.setAlignmentX(Component.LEFT_ALIGNMENT);
+		p.add(fragmentsNote);
+		p.add(Box.createVerticalStrut(4));
 		for (JCheckBox box : new JCheckBox[]{depositBox, graceBox})
 		{
 			box.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -205,6 +217,30 @@ public class GotrCoachPanel extends PluginPanel
 		depositBox.addActionListener(e -> set("depositRunes", depositBox.isSelected()));
 		graceBox.addActionListener(e -> set("graceHold", graceBox.isSelected()));
 		return p;
+	}
+
+	/** Opening fragments: type a number or step by 5; Auto returns to the strategy default. */
+	private JPanel fragmentsRow()
+	{
+		JPanel r = new JPanel(new BorderLayout(4, 0));
+		r.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		r.setAlignmentX(Component.LEFT_ALIGNMENT);
+		JLabel l = new JLabel("Fragments");
+		l.setFont(FontManager.getRunescapeSmallFont());
+		l.setForeground(MUTED);
+		l.setPreferredSize(new Dimension(70, 20));
+		fragmentsSpinner.setFont(FontManager.getRunescapeSmallFont());
+		fragmentsAuto.setFont(FontManager.getRunescapeSmallFont());
+		fragmentsAuto.setFocusPainted(false);
+		fragmentsAuto.setToolTipText("Use the strategy's default (mass 168, team 120, solo 110)");
+		r.add(l, BorderLayout.WEST);
+		r.add(fragmentsSpinner, BorderLayout.CENTER);
+		r.add(fragmentsAuto, BorderLayout.EAST);
+		r.setMaximumSize(new Dimension(Integer.MAX_VALUE, 24));
+
+		fragmentsSpinner.addChangeListener(e -> set("openingFragments", ((Number) fragmentsSpinner.getValue()).intValue()));
+		fragmentsAuto.addActionListener(e -> set("openingFragments", 0));
+		return r;
 	}
 
 	private JPanel labelled(String name, JComboBox<?> box)
@@ -241,6 +277,10 @@ public class GotrCoachPanel extends PluginPanel
 			strategyBox.setSelectedItem(config.strategy());
 			altarBox.setSelectedItem(config.altarMode());
 			portalBox.setSelectedItem(config.portalPriority());
+			int saved = config.openingFragments();
+			int shown = saved > 0 ? saved : config.strategy().defaultOpeningFragments();
+			fragmentsSpinner.setValue(Math.max(10, Math.min(300, shown)));
+			fragmentsNote.setText(saved > 0 ? "Custom, Auto resets it" : "Auto: strategy default");
 			depositBox.setSelected(config.depositRunes());
 			graceBox.setSelected(config.graceHold());
 		}
