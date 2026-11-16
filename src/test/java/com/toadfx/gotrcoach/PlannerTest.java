@@ -431,4 +431,35 @@ public class PlannerTest
 		s.elementalStones = 10;
 		assertEquals("stones first", Step.HAND_IN_NOW, Planner.plan(s, team()).getStep());
 	}
+
+	@Test
+	public void portalDueSoonHoldsAltarTrips()
+	{
+		Snapshot s = crafting();
+		s.essence = 14;
+		s.freeSlots = 14;
+		s.secondsToPortal = 12;
+		Instruction i = Planner.plan(s, team());
+		assertEquals(Step.WAIT_FOR_PORTAL, i.getStep());
+		assertTrue(i.getDetail(), i.getDetail().contains("12s"));
+
+		// Further out than the countdown: go craft.
+		s.secondsToPortal = 40;
+		assertEquals(Step.ENTER_ALTAR, Planner.plan(s, team()).getStep());
+
+		// Full inventory and pouches: the portal is no use, so go anyway.
+		s.secondsToPortal = 12;
+		s.freeSlots = 0;
+		s.essence = 28;
+		s.essenceInPouches = 40;
+		assertEquals(Step.ENTER_ALTAR, Planner.plan(s, team()).getStep());
+
+		// Turned off.
+		PlannerSettings off = team();
+		off.holdForPortal = false;
+		s.freeSlots = 14;
+		s.essence = 14;
+		s.essenceInPouches = 0;
+		assertEquals(Step.ENTER_ALTAR, Planner.plan(s, off).getStep());
+	}
 }

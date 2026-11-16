@@ -223,6 +223,11 @@ public final class Planner
 
 		if (s.essenceCarried() > 0)
 		{
+			if (portalDueSoon(s, st))
+			{
+				return new Instruction(Step.WAIT_FOR_PORTAL, Target.NONE, null,
+					"Portal in ~" + s.secondsToPortal + "s. An altar trip now means missing it", Urgency.SOON);
+			}
 			return enterAltar(s, st);
 		}
 
@@ -331,6 +336,13 @@ public final class Planner
 	}
 
 	// ---------------------------------------------------------------- helpers
+
+	/** A portal is expected shortly and there's room to make it worth waiting for. */
+	static boolean portalDueSoon(Snapshot s, PlannerSettings st)
+	{
+		return st.holdForPortal && !s.portalOpen && s.secondsToPortal > 0 && s.secondsToPortal <= st.portalSoonSeconds
+			&& s.essenceRoom() >= Math.min(st.portalMinRoom, 10);
+	}
 
 	static boolean portalReachable(Snapshot s)
 	{

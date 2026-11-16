@@ -21,6 +21,7 @@ public enum Step
 	POWER_UP("Power up the Great Guardian"),
 	HOLD_STONES("Hold your stones"),
 	DEPOSIT_RUNES("Deposit runes"),
+	WAIT_FOR_PORTAL("Portal soon, stay out of altars"),
 	ENTER_REMAINS_PORTAL("Take the portal"),
 	MINE_HUGE_REMAINS("Mine essence"),
 	LEAVE_REMAINS("Leave the huge remains"),

@@ -63,6 +63,9 @@ public interface GotrCoachConfig extends Config
 	@ConfigSection(name = "Timeline bar", description = "The round timeline", position = 4)
 	String timelineSection = "timeline";
 
+	@ConfigSection(name = "Portal countdown", description = "Big on-screen countdown before each portal", position = 4)
+	String countdownSection = "countdown";
+
 	@ConfigSection(name = "Info panel", description = "The step and stats panel", position = 5)
 	String panelSection = "panel";
 
@@ -529,6 +532,47 @@ public interface GotrCoachConfig extends Config
 		return true;
 	}
 
+	// ------------------------------------------------------------ portal countdown
+
+	@ConfigItem(keyName = "portalCountdown", name = "Show countdown", position = 0, section = countdownSection,
+		description = "Large 'Portal in 12' countdown on screen before the next portal is expected")
+	default boolean portalCountdown()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "countdownSeconds", name = "Start counting at", position = 1, section = countdownSection,
+		description = "Seconds before the expected portal that the countdown, alert and altar hold begin")
+	@Range(min = 5, max = 60)
+	@Units(Units.SECONDS)
+	default int countdownSeconds()
+	{
+		return 15;
+	}
+
+	@ConfigItem(keyName = "countdownSize", name = "Text size", position = 2, section = countdownSection,
+		description = "Countdown text size")
+	@Range(min = 16, max = 72)
+	@Units(Units.PIXELS)
+	default int countdownSize()
+	{
+		return 34;
+	}
+
+	@ConfigItem(keyName = "countdownOpen", name = "Show while open", position = 3, section = countdownSection,
+		description = "After it spawns, keep showing 'PORTAL OPEN' with the time left")
+	default boolean countdownWhileOpen()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "holdForPortal", name = "Hold altar trips", position = 4, section = countdownSection,
+		description = "During the countdown, don't send you into an altar (you'd be inside when it spawns). Full inventories still go")
+	default boolean holdForPortal()
+	{
+		return true;
+	}
+
 	// ------------------------------------------------------------ panel
 
 	@ConfigItem(keyName = "sidePanel", name = "Side panel", position = -1, section = panelSection,
@@ -634,19 +678,10 @@ public interface GotrCoachConfig extends Config
 	}
 
 	@ConfigItem(keyName = "notifyPortalSoon", name = "Portal about to spawn", position = 2, section = notifySection,
-		description = "Alert shortly before the next portal is expected, so you can get room ready")
+		description = "Desktop alert when the portal countdown starts (see Portal countdown for the timing)")
 	default boolean notifyPortalSoon()
 	{
 		return true;
-	}
-
-	@ConfigItem(keyName = "portalSoonSeconds", name = "...seconds before", position = 2, section = notifySection,
-		description = "How early the 'portal soon' alert fires")
-	@Range(min = 3, max = 60)
-	@Units(Units.SECONDS)
-	default int portalSoonSeconds()
-	{
-		return 15;
 	}
 
 	@ConfigItem(keyName = "notifyFragments", name = "Opening fragments reached", position = 3, section = notifySection,

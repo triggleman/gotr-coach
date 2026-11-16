@@ -9,6 +9,7 @@ import com.toadfx.gotrcoach.model.CellTier;
 import com.toadfx.gotrcoach.overlay.InfoPanelOverlay;
 import com.toadfx.gotrcoach.overlay.ItemHighlightOverlay;
 import com.toadfx.gotrcoach.overlay.MinimapPathOverlay;
+import com.toadfx.gotrcoach.overlay.PortalCountdownOverlay;
 import com.toadfx.gotrcoach.overlay.Pathfinder;
 import com.toadfx.gotrcoach.overlay.SceneOverlay;
 import com.toadfx.gotrcoach.overlay.TimelineOverlay;
@@ -119,6 +120,9 @@ public class GotrCoachPlugin extends Plugin
 	private ItemHighlightOverlay itemHighlightOverlay;
 
 	@Inject
+	private PortalCountdownOverlay portalCountdownOverlay;
+
+	@Inject
 	private ClientToolbar clientToolbar;
 
 	private GotrCoachPanel sidePanel;
@@ -177,6 +181,7 @@ public class GotrCoachPlugin extends Plugin
 		overlayManager.add(timelineOverlay);
 		overlayManager.add(minimapPathOverlay);
 		overlayManager.add(itemHighlightOverlay);
+		overlayManager.add(portalCountdownOverlay);
 
 		BufferedImage logo = ImageUtil.loadImageResource(GotrCoachPlugin.class, "panel_logo.png");
 		BufferedImage icon = ImageUtil.loadImageResource(GotrCoachPlugin.class, "panel_icon.png");
@@ -210,6 +215,7 @@ public class GotrCoachPlugin extends Plugin
 		overlayManager.remove(timelineOverlay);
 		overlayManager.remove(minimapPathOverlay);
 		overlayManager.remove(itemHighlightOverlay);
+		overlayManager.remove(portalCountdownOverlay);
 		if (navButton != null)
 		{
 			clientToolbar.removeNavigation(navButton);
@@ -512,6 +518,8 @@ public class GotrCoachPlugin extends Plugin
 		s.portalOpen = tracker.isPortalOpen();
 		s.portalTicksLeft = tracker.getPortalTicksLeft();
 		s.secondsSincePortal = tracker.getSecondsSincePortal();
+		int nextPortal = tracker.getNextPortalGameSecond();
+		s.secondsToPortal = s.portalOpen || nextPortal < 0 || !tracker.isInGame() ? -1 : Math.max(0, nextPortal - s.gameSeconds);
 		s.fragments = inv.fragments;
 		s.essence = inv.essence;
 		s.runecraftLevel = tracker.getRunecraftLevel();
@@ -591,6 +599,8 @@ public class GotrCoachPlugin extends Plugin
 		p.balanceWithBanked = config.balanceWithBanked();
 		p.portalMinRoom = config.portalMinRoom();
 		p.portalAlways = config.portalPriority() == GotrCoachConfig.PortalPriority.ALWAYS;
+		p.holdForPortal = config.holdForPortal();
+		p.portalSoonSeconds = config.countdownSeconds();
 		p.depositRunes = config.depositRunes();
 		p.depositBelowFreeSlots = config.depositBelowFreeSlots();
 		p.unchargedCellsWanted = config.unchargedCellsWanted();
@@ -875,7 +885,7 @@ public class GotrCoachPlugin extends Plugin
 			int nextPortal = tracker.getNextPortalGameSecond();
 			int portalIn = nextPortal - snapshot.gameSeconds;
 			if (config.notifyPortalSoon() && !snapshot.portalOpen && nextPortal >= 0 && nextPortal != notifiedPortalSoonFor
-				&& portalIn > 0 && portalIn <= config.portalSoonSeconds())
+				&& portalIn > 0 && portalIn <= config.countdownSeconds())
 			{
 				notifier.notify("GOTR: portal in ~" + portalIn + "s");
 				notifiedPortalSoonFor = nextPortal;

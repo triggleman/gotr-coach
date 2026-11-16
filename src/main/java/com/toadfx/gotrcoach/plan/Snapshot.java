@@ -38,6 +38,8 @@ public class Snapshot
 	public int portalTicksLeft = -1;
 	/** Seconds since the last huge-remains portal spawned (-1 if none this game). */
 	public int secondsSincePortal = -1;
+	/** Seconds until the next portal is expected (-1 when unknown or one is open). */
+	public int secondsToPortal = -1;
 
 	public int fragments;
 	public int essence;

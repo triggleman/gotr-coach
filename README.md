@@ -22,6 +22,11 @@ It only shows information. It never clicks or acts for you.
 - By default an open huge-remains portal beats everything else (stones, cells, crafting) as long as you can reach it in time and have room. It's drawn in red: path, outline, label and step.
 - Prefer the old way? Set Portal priority to "Only with min room".
 
+**Portal countdown**
+- A big on-screen countdown before each expected portal: "PORTAL IN 12". It turns red and flashes for the last five seconds, then shows "PORTAL OPEN" with the seconds left and which side it's on.
+- While it counts down, the planner won't send you into an altar, since you'd be stuck inside when it spawns. If your inventory and pouches are full, it still sends you, because the portal is no use then.
+- Start time (15 seconds by default), text size, and whether to keep showing it once open are all adjustable. You can move it anywhere on screen.
+
 **Path and travel time**
 - A walking route to the target, drawn as a line, tiles, or both, plus the minimap if you want it. It uses the rubble shortcut if you have 56 Agility.
 - The line starts at your character and moves with you every frame. Staircase zigzags are straightened out and corners are rounded.

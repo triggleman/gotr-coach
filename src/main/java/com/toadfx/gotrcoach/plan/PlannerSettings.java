@@ -22,6 +22,9 @@ public class PlannerSettings
 	public int portalMinRoom = 20;
 	/** Portal first: drop everything else (stones, cells, crafting) when a portal is open and reachable. */
 	public boolean portalAlways = true;
+	/** Don't start an altar trip when a portal is due within portalSoonSeconds (you'd be stuck in the altar). */
+	public boolean holdForPortal = true;
+	public int portalSoonSeconds = 15;
 	public boolean depositRunes = false;
 	/** Deposit runes once free slots fall below this. */
 	public int depositBelowFreeSlots = 24;
