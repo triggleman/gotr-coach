@@ -100,20 +100,6 @@ It only shows information. It never clicks or acts for you.
 - Notifications for the round starting, the altars opening, a portal, reaching your fragment target, chosen altars opening, hitting the energy cap, and a pouch needing repair.
 - Banked reward points and the searches you can afford.
 
-## Building
-
-Open the folder in IntelliJ and run `GotrCoachPluginTest` (in `src/test`). Or run:
-
-```
-./gradlew run
-```
-
-Unit tests cover the planner, altar choice, energy maths, HUD parsing and grading:
-
-```
-./gradlew test
-```
-
 ## Credits
 
 Strategy and numbers come from the [OSRS Wiki](https://oldschool.runescape.wiki/w/Guardians_of_the_Rift/Strategies). Built on [RuneLite](https://runelite.net).
