@@ -12,6 +12,10 @@ It only shows information. It never clicks or acts for you.
 
 ![Mining phase with the timeline countdown](docs/screenshots/mining-phase.jpg)
 
+**Fragments reached.** Hit your opening target and a green banner pops up while your fragment stack flashes, then the step switches to crafting essence.
+
+![Fragments reached banner](docs/screenshots/fragments-reached.jpg)
+
 **Rubble shortcut.** With 56 Agility the route uses the rubble, drawn dashed, on the way back to the workbench.
 
 ![Dashed line over the rubble shortcut](docs/screenshots/rubble-shortcut.jpg)
