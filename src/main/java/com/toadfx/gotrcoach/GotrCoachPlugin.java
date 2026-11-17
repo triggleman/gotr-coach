@@ -9,6 +9,7 @@ import com.toadfx.gotrcoach.model.CellTier;
 import com.toadfx.gotrcoach.overlay.InfoPanelOverlay;
 import com.toadfx.gotrcoach.overlay.ItemHighlightOverlay;
 import com.toadfx.gotrcoach.overlay.MinimapPathOverlay;
+import com.toadfx.gotrcoach.overlay.FragmentAlertOverlay;
 import com.toadfx.gotrcoach.overlay.PortalCountdownOverlay;
 import com.toadfx.gotrcoach.overlay.Pathfinder;
 import com.toadfx.gotrcoach.overlay.SceneOverlay;
@@ -123,6 +124,9 @@ public class GotrCoachPlugin extends Plugin
 	private PortalCountdownOverlay portalCountdownOverlay;
 
 	@Inject
+	private FragmentAlertOverlay fragmentAlertOverlay;
+
+	@Inject
 	private ClientToolbar clientToolbar;
 
 	private GotrCoachPanel sidePanel;
@@ -156,6 +160,8 @@ public class GotrCoachPlugin extends Plugin
 	private int notifiedPortals;
 	private int notifiedPortalSoonFor = -1;
 	private GameRecord pendingSummary;
+	private volatile long fragmentsReachedNanos;
+	private volatile boolean fragmentsTargetMet;
 	private final Set<Alignment> notifiedCap = EnumSet.noneOf(Alignment.class);
 	private Altar lastActiveElemental;
 	private Altar lastActiveCatalytic;
@@ -182,6 +188,7 @@ public class GotrCoachPlugin extends Plugin
 		overlayManager.add(minimapPathOverlay);
 		overlayManager.add(itemHighlightOverlay);
 		overlayManager.add(portalCountdownOverlay);
+		overlayManager.add(fragmentAlertOverlay);
 
 		BufferedImage logo = ImageUtil.loadImageResource(GotrCoachPlugin.class, "panel_logo.png");
 		BufferedImage icon = ImageUtil.loadImageResource(GotrCoachPlugin.class, "panel_icon.png");
@@ -216,6 +223,7 @@ public class GotrCoachPlugin extends Plugin
 		overlayManager.remove(minimapPathOverlay);
 		overlayManager.remove(itemHighlightOverlay);
 		overlayManager.remove(portalCountdownOverlay);
+		overlayManager.remove(fragmentAlertOverlay);
 		if (navButton != null)
 		{
 			clientToolbar.removeNavigation(navButton);
@@ -407,6 +415,7 @@ public class GotrCoachPlugin extends Plugin
 		bestAltar = choice == null ? null : choice.primary;
 		otherAltar = choice == null ? null : choice.secondary;
 
+		trackFragmentsReached(settings);
 		onStepChange(next);
 		instruction = next;
 		resolveTarget();
@@ -819,6 +828,30 @@ public class GotrCoachPlugin extends Plugin
 		}
 	}
 
+	/** Remembers when the opening fragment target was reached this round (mining phase only). */
+	private void trackFragmentsReached(PlannerSettings settings)
+	{
+		boolean reached = snapshot.phase == GamePhase.MINING && !openingCraftStarted
+			&& snapshot.location != Location.HUGE_REMAINS && snapshot.fragments >= settings.openingFragments();
+		if (reached && fragmentsReachedNanos == 0)
+		{
+			fragmentsReachedNanos = System.nanoTime();
+		}
+		fragmentsTargetMet = reached;
+	}
+
+	/** True while mining with the opening target reached and crafting not yet started. */
+	public boolean isFragmentsTargetMet()
+	{
+		return fragmentsTargetMet;
+	}
+
+	/** Seconds since the opening target was reached this round, or -1. */
+	public double secondsSinceFragmentsReached()
+	{
+		return fragmentsReachedNanos == 0 ? -1 : (System.nanoTime() - fragmentsReachedNanos) / 1e9;
+	}
+
 	private int runecraftXp()
 	{
 		return client.getSkillExperience(net.runelite.api.Skill.RUNECRAFT);
@@ -931,6 +964,8 @@ public class GotrCoachPlugin extends Plugin
 	{
 		notifiedAltars = false;
 		notifiedFragments = false;
+		fragmentsReachedNanos = 0;
+		fragmentsTargetMet = false;
 		notifiedPortals = 0;
 		notifiedPortalSoonFor = -1;
 		notifiedCap.clear();

@@ -90,6 +90,7 @@ It only shows information. It never clicks or acts for you.
 **Quality of life**
 - Hides Power-up without stones and Place-cell without a cell.
 - Inactive and locked guardians never take the left click. Neither does the Great Guardian while you're holding a cell.
+- When you reach your opening fragments: a big green "FRAGMENTS REACHED" banner for a few seconds, and your fragment stack flashes green in the inventory until you start crafting.
 - A warning before the next portal spawns (15 seconds by default, adjustable).
 - Notifications for the round starting, the altars opening, a portal, reaching your fragment target, chosen altars opening, hitting the energy cap, and a pouch needing repair.
 - Banked reward points and the searches you can afford.

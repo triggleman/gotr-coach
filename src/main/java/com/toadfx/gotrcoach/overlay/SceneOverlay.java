@@ -195,7 +195,13 @@ public class SceneOverlay extends Overlay
 		BasicStroke dashed = new BasicStroke(config.pathWidth(), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND, 10f,
 			new float[]{8f, 8f}, 0f);
 
-		if (config.roundCorners())
+		boolean shortcutAhead = false;
+		for (int k = Math.max(0, first - 1); k + 1 < path.size(); k++)
+		{
+			shortcutAhead |= isShortcut(path.get(k), path.get(k + 1));
+		}
+		// Rounded corners can't show the dashed rubble climb, so that route draws straight.
+		if (config.roundCorners() && !shortcutAhead)
 		{
 			java.awt.geom.Path2D.Double shape = new java.awt.geom.Path2D.Double();
 			List<Point> pts = new java.util.ArrayList<>();
@@ -211,6 +217,11 @@ public class SceneOverlay extends Overlay
 				{
 					pts.add(p);
 				}
+			}
+			Point end = targetCentre(wv);
+			if (end != null)
+			{
+				pts.add(end);
 			}
 			if (pts.size() < 2)
 			{
@@ -246,6 +257,30 @@ public class SceneOverlay extends Overlay
 			}
 			prev = p;
 		}
+		// Finish on the target itself, not the tile you stand on to use it.
+		Point end = targetCentre(wv);
+		if (end != null && prev != null)
+		{
+			g.setStroke(solid);
+			g.drawLine(prev.getX(), prev.getY(), end.getX(), end.getY());
+		}
+	}
+
+	/** Where the line should end: the centre of the target object or NPC, at ground level. */
+	private Point targetCentre(WorldView wv)
+	{
+		LocalPoint lp = null;
+		TileObject obj = plugin.getTargetObject();
+		NPC npc = plugin.getTargetNpc();
+		if (obj != null)
+		{
+			lp = obj.getLocalLocation();
+		}
+		else if (npc != null)
+		{
+			lp = npc.getLocalLocation();
+		}
+		return lp == null ? null : Perspective.localToCanvas(client, lp, wv.getPlane());
 	}
 
 	/** The rubble climb between the temple and the large remains. */

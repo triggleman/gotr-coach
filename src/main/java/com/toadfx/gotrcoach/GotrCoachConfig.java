@@ -247,7 +247,7 @@ public interface GotrCoachConfig extends Config
 		description = "Curve the path at each corner instead of straight segments")
 	default boolean roundCorners()
 	{
-		return false;
+		return true;
 	}
 
 	@Alpha
@@ -704,6 +704,20 @@ public interface GotrCoachConfig extends Config
 	@ConfigItem(keyName = "notifyFragments", name = "Opening fragments reached", position = 3, section = notifySection,
 		description = "Alert when you've mined your opening fragment target")
 	default boolean notifyFragments()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "fragmentsBanner", name = "Fragments reached banner", position = 3, section = notifySection,
+		description = "Big on-screen 'FRAGMENTS REACHED' banner when you hit your opening fragments")
+	default boolean fragmentsBanner()
+	{
+		return true;
+	}
+
+	@ConfigItem(keyName = "fragmentsInventory", name = "Flash fragments in inventory", position = 3, section = notifySection,
+		description = "Flash your fragment stack green once it reaches the opening target, until you start crafting")
+	default boolean fragmentsInventory()
 	{
 		return true;
 	}

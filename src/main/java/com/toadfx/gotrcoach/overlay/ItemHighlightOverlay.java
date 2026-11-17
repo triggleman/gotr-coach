@@ -32,12 +32,25 @@ public class ItemHighlightOverlay extends WidgetItemOverlay
 	@Override
 	public void renderItemOverlay(Graphics2D g, int itemId, WidgetItem item)
 	{
-		if (!config.itemHighlights() || plugin.getTracker() == null)
+		if (plugin.getTracker() == null)
 		{
 			return;
 		}
 		Snapshot s = plugin.getSnapshot();
-		if (!wanted(plugin.getInstruction().getStep(), itemId, s))
+		if (itemId == ItemID.GOTR_GUARDIAN_FRAGMENT && config.fragmentsInventory() && plugin.isFragmentsTargetMet())
+		{
+			// Opening target reached: flash the fragment stack green until crafting starts.
+			Rectangle r = item.getCanvasBounds();
+			double phase = (System.currentTimeMillis() % 800) / 800.0;
+			int alpha = (int) (60 + 90 * Math.abs(Math.cos(phase * Math.PI)));
+			g.setColor(new Color(60, 230, 90, alpha));
+			g.fill(r);
+			g.setColor(new Color(60, 230, 90));
+			g.setStroke(new BasicStroke(2));
+			g.draw(r);
+			return;
+		}
+		if (!config.itemHighlights() || !wanted(plugin.getInstruction().getStep(), itemId, s))
 		{
 			return;
 		}
