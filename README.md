@@ -104,4 +104,8 @@ It only shows information. It never clicks or acts for you.
 
 Strategy and numbers come from the [OSRS Wiki](https://oldschool.runescape.wiki/w/Guardians_of_the_Rift/Strategies). Built on [RuneLite](https://runelite.net).
 
+Bugs and ideas: [open an issue](https://github.com/triggleman/gotr-coach/issues).
+
+Old School RuneScape is a trademark of Jagex Ltd. This plugin is not affiliated with or endorsed by Jagex.
+
 Made by ToadFx.

@@ -1,0 +1,17 @@
+GOTR Coach
+Made by ToadFx
+
+Old School RuneScape Wiki
+-------------------------
+https://oldschool.runescape.wiki/w/Guardians_of_the_Rift/Strategies
+The strategy timelines (mass, team and solo), altar priority, energy caps, cell tiers,
+portal timings and the grace-portal rule come from the wiki's Guardians of the Rift pages.
+
+RuneLite
+--------
+https://github.com/runelite/runelite
+Game IDs (objects, NPCs, items, varbits, animations) come from RuneLite's gameval API.
+No code from other Plugin Hub plugins is included; GOTR Coach is written from scratch.
+
+Old School RuneScape and RuneScape are trademarks of Jagex Ltd. This plugin is not affiliated
+with or endorsed by Jagex.
