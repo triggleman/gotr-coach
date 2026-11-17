@@ -61,6 +61,8 @@ public class GotrCoachPanel extends PluginPanel
 	private final JPanel pointRows = new JPanel();
 	private final JPanel lastRows = new JPanel();
 	private final JPanel historyRows = new JPanel();
+	private final JPanel sessionRows = new JPanel();
+	private final JPanel bestRows = new JPanel();
 
 	private final JComboBox<Strategy> strategyBox = new JComboBox<>(Strategy.values());
 	private final JComboBox<AltarMode> altarBox = new JComboBox<>(AltarMode.values());
@@ -112,7 +114,9 @@ public class GotrCoachPanel extends PluginPanel
 		content.add(section("Round", rows(roundRows)));
 		content.add(section("Points", rows(pointRows)));
 		content.add(section("Quick settings", settingsCard()));
+		content.add(section("Session", sessionCard()));
 		content.add(section("Last round", rows(lastRows)));
+		content.add(section("Personal bests", rows(bestRows)));
 		content.add(section("History", rows(historyRows)));
 
 		JLabel credit = new JLabel("Made by ToadFx");
@@ -185,6 +189,27 @@ public class GotrCoachPanel extends PluginPanel
 	{
 		String safe = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
 		return "<html><body style='width:" + (PANEL_WIDTH - 40) + "px'>" + safe + "</body></html>";
+	}
+
+	private JPanel sessionCard()
+	{
+		JPanel wrap = new JPanel(new BorderLayout());
+		wrap.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		wrap.add(rows(sessionRows), BorderLayout.CENTER);
+		JButton reset = new JButton("Reset session");
+		reset.setFont(FontManager.getRunescapeSmallFont());
+		reset.setFocusPainted(false);
+		reset.addActionListener(e ->
+		{
+			plugin.resetSession();
+			javax.swing.SwingUtilities.invokeLater(this::refresh);
+		});
+		JPanel buttonRow = new JPanel(new BorderLayout());
+		buttonRow.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+		buttonRow.setBorder(new EmptyBorder(0, 8, 6, 8));
+		buttonRow.add(reset, BorderLayout.CENTER);
+		wrap.add(buttonRow, BorderLayout.SOUTH);
+		return wrap;
 	}
 
 	private JPanel settingsCard()
@@ -378,9 +403,10 @@ public class GotrCoachPanel extends PluginPanel
 		else if (tracker != null && tracker.getPhase() != GamePhase.IDLE)
 		{
 			row(roundRows, "Rift opens", s.countdownSeconds >= 0 ? s.countdownSeconds + "s" : "waiting", SOON);
-			row(roundRows, "Uncharged cells", String.valueOf(s.unchargedCells), Color.WHITE);
-			row(roundRows, "Pouches", s.pouchNeedsRepair ? "need repair" : s.hasPouches ? "ok" : "none",
-				s.pouchNeedsRepair ? NOW : Color.WHITE);
+			int cells = config.unchargedCellsWanted();
+			row(roundRows, "Pickaxe", s.hasPickaxe ? "OK" : "MISSING", s.hasPickaxe ? GOOD : NOW);
+			row(roundRows, "Chisel", s.hasChisel ? "OK" : "MISSING", s.hasChisel ? GOOD : NOW);
+			row(roundRows, "Uncharged cells", s.unchargedCells + " / " + cells, s.unchargedCells >= cells ? GOOD : NOW);
 		}
 		else
 		{
@@ -432,6 +458,54 @@ public class GotrCoachPanel extends PluginPanel
 			for (String tip : last.tips)
 			{
 				note(lastRows, "• " + tip, MUTED);
+			}
+		}
+
+		// Session
+		sessionRows.removeAll();
+		com.toadfx.gotrcoach.coach.Session session = plugin.getSession();
+		long now = System.currentTimeMillis();
+		if (session.isEmpty())
+		{
+			note(sessionRows, "Stats start with your first round.", MUTED);
+		}
+		else
+		{
+			long mins = session.elapsedMillis(now) / 60_000;
+			row(sessionRows, "Time", (mins / 60) + "h " + (mins % 60) + "m", Color.WHITE);
+			row(sessionRows, "Rounds", session.getRounds() + " (" + session.getWins() + " won)", Color.WHITE);
+			row(sessionRows, "XP", String.format("%,d", session.getXp()), GOOD);
+			row(sessionRows, "XP / hr", String.format("%,.0f", session.xpPerHour(now)), GOOD);
+			row(sessionRows, "Points", String.format("%.1f", session.getPoints()), Color.WHITE);
+			row(sessionRows, "Points / hr", String.format("%.1f", session.pointsPerHour(now)), Color.WHITE);
+			row(sessionRows, "Rounds / hr", String.format("%.1f", session.roundsPerHour(now)), MUTED);
+			if (session.averageScore() >= 0)
+			{
+				row(sessionRows, "Avg grade", String.format("%.0f", session.averageScore()), ACCENT);
+			}
+		}
+
+		// Personal bests
+		bestRows.removeAll();
+		com.toadfx.gotrcoach.coach.PersonalBests b = plugin.getBests();
+		if (b.isEmpty())
+		{
+			note(bestRows, "Finish a round to set your bests.", MUTED);
+		}
+		else
+		{
+			row(bestRows, "Most points", String.format("%.1f", b.mostEnergy / 100.0), new Color(255, 215, 0));
+			if (b.mostXp > 0)
+			{
+				row(bestRows, "Most XP", String.format("%,d", b.mostXp), new Color(255, 215, 0));
+			}
+			if (b.fastestWin > 0)
+			{
+				row(bestRows, "Fastest round", GotrCoachPlugin.formatTime(b.fastestWin), new Color(255, 215, 0));
+			}
+			if (b.bestScore >= 0)
+			{
+				row(bestRows, "Best grade", b.bestGrade + " (" + b.bestScore + ")", gradeColor(b.bestGrade));
 			}
 		}
 

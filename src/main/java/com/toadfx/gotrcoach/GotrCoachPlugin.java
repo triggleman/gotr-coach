@@ -3,6 +3,8 @@ package com.toadfx.gotrcoach;
 import com.google.inject.Provides;
 import com.toadfx.gotrcoach.coach.GameRecord;
 import com.toadfx.gotrcoach.coach.GameRecorder;
+import com.toadfx.gotrcoach.coach.PersonalBests;
+import com.toadfx.gotrcoach.coach.Session;
 import com.toadfx.gotrcoach.model.Alignment;
 import com.toadfx.gotrcoach.model.Altar;
 import com.toadfx.gotrcoach.model.CellTier;
@@ -83,6 +85,7 @@ public class GotrCoachPlugin extends Plugin
 	private static final String KEY_BANKED_E = "bankedElemental";
 	private static final String KEY_BANKED_C = "bankedCatalytic";
 	private static final String KEY_HISTORY = "history";
+	private static final String KEY_BESTS = "bests";
 	/** Rubble shortcut ends (needs 56 Agility). */
 	public static final WorldPoint RUBBLE_TEMPLE_SIDE = new WorldPoint(3633, 9503, 0);
 	public static final WorldPoint RUBBLE_REMAINS_SIDE = new WorldPoint(3637, 9503, 0);
@@ -138,6 +141,8 @@ public class GotrCoachPlugin extends Plugin
 	private GameTracker tracker;
 	private final Pathfinder pathfinder = new Pathfinder();
 	private final GameRecorder recorder = new GameRecorder();
+	private final Session session = new Session();
+	private PersonalBests bests = new PersonalBests();
 
 	// What the overlays draw, refreshed every tick.
 	private Snapshot snapshot = new Snapshot();
@@ -346,7 +351,9 @@ public class GotrCoachPlugin extends Plugin
 		if ("coachReset".equals(e.getKey()) && config.coachReset())
 		{
 			recorder.clearHistory();
+			bests = new PersonalBests();
 			configManager.unsetRSProfileConfiguration(GotrCoachConfig.GROUP, KEY_HISTORY);
+			configManager.unsetRSProfileConfiguration(GotrCoachConfig.GROUP, KEY_BESTS);
 			configManager.setConfiguration(GotrCoachConfig.GROUP, "coachReset", false);
 		}
 		if ("hintArrow".equals(e.getKey()) && !config.hintArrow())
@@ -544,6 +551,7 @@ public class GotrCoachPlugin extends Plugin
 		s.chargedCell = inv.chargedCell;
 		s.unchargedCells = inv.unchargedCells;
 		s.hasChisel = inv.chisel;
+		s.hasPickaxe = inv.pickaxe;
 		s.runeSlots = inv.runeSlots;
 		s.energyElemental = tracker.getEnergyElemental();
 		s.energyCatalytic = tracker.getEnergyCatalytic();
@@ -819,7 +827,14 @@ public class GotrCoachPlugin extends Plugin
 			return;
 		}
 		pendingSummary = null;
+		session.add(r);
+		List<String> beaten = bests.update(r);
 		configManager.setRSProfileConfiguration(GotrCoachConfig.GROUP, KEY_HISTORY, recorder.serializeHistory());
+		configManager.setRSProfileConfiguration(GotrCoachConfig.GROUP, KEY_BESTS, bests.serialize());
+		if (config.coachChat() && !beaten.isEmpty())
+		{
+			chat("<col=00c8ff>GOTR Coach:</col> <col=ffd700>New personal best!</col> " + String.join(", ", beaten));
+		}
 		if (config.coachChat() && r.score >= 0)
 		{
 			String tip = r.tips.isEmpty() ? "" : " " + r.tips.get(0);
@@ -892,7 +907,8 @@ public class GotrCoachPlugin extends Plugin
 			int cd = snapshot.countdownSeconds;
 			if (config.notifyStart() && !notifiedStart && cd >= 0 && cd <= 10)
 			{
-				notifier.notify("GOTR: the rift opens in " + cd + "s");
+				List<String> missing = snapshot.missingGear(config.unchargedCellsWanted());
+				notifier.notify("GOTR: the rift opens in " + cd + "s" + (missing.isEmpty() ? "" : ". Missing: " + String.join(", ", missing)));
 				notifiedStart = true;
 			}
 			if (config.notifyPouch() && !notifiedPouch && snapshot.pouchNeedsRepair)
@@ -974,6 +990,7 @@ public class GotrCoachPlugin extends Plugin
 		openingCraftStarted = false;
 		lastEssenceCarried = 0;
 		lastFragments = 0;
+		session.roundStarted(System.currentTimeMillis());
 		if (config.coaching())
 		{
 			recorder.start(config.strategy(), tracker.isJoinedLate(), runecraftXp());
@@ -1061,6 +1078,12 @@ public class GotrCoachPlugin extends Plugin
 			}
 		}
 		recorder.loadHistory(configManager.getRSProfileConfiguration(GotrCoachConfig.GROUP, KEY_HISTORY));
+		bests = PersonalBests.parse(configManager.getRSProfileConfiguration(GotrCoachConfig.GROUP, KEY_BESTS));
+		if (bests.isEmpty())
+		{
+			// First run with bests: start from the rounds already saved.
+			bests.seed(recorder.getHistory());
+		}
 	}
 
 	private void saveBankedIfChanged()
@@ -1156,6 +1179,22 @@ public class GotrCoachPlugin extends Plugin
 	public GameRecorder getRecorder()
 	{
 		return recorder;
+	}
+
+	public Session getSession()
+	{
+		return session;
+	}
+
+	public PersonalBests getBests()
+	{
+		return bests;
+	}
+
+	/** Clears session stats (side panel button). Runs on the client thread. */
+	public void resetSession()
+	{
+		clientThread.invokeLater(session::reset);
 	}
 
 	public PlannerSettings currentSettings()

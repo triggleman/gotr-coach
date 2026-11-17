@@ -503,4 +503,25 @@ public class PlannerTest
 		s.altarTicksLeft = 5;
 		assertEquals(Step.CRAFT_ESSENCE, Planner.plan(s, team()).getStep());
 	}
+
+	@Test
+	public void gearCheckBeforeTheRound()
+	{
+		Snapshot s = new Snapshot();
+		s.phase = GamePhase.WAITING;
+		s.location = Location.TEMPLE;
+		s.unchargedCells = 10;
+		s.chargedCell = CellTier.WEAK;
+		s.hasPickaxe = false;
+		assertEquals(Step.GET_PICKAXE, Planner.plan(s, team()).getStep());
+		s.hasPickaxe = true;
+		s.hasChisel = false;
+		assertEquals(Step.GET_CHISEL, Planner.plan(s, team()).getStep());
+		s.hasChisel = true;
+		assertEquals(Step.WAIT_FOR_START, Planner.plan(s, team()).getStep());
+
+		s.unchargedCells = 4;
+		s.hasChisel = false;
+		assertEquals(java.util.Arrays.asList("chisel", "6 uncharged cells"), s.missingGear(10));
+	}
 }

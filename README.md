@@ -85,7 +85,12 @@ It only shows information. It never clicks or acts for you.
 - After every round you get a grade (S/A/B/C/D) and a score out of 100, based on your energy, when you started crafting, your first altar, portals used versus spawned, idle time and point balance.
 - The top tip goes in chat. The last round, your tips and your recent average show in the panel between rounds.
 - Runecraft XP per round, including the end-of-round reward: live during the round, in the chat summary, in the last-round panel, in history and as an average.
+- **Personal bests:** most points, most XP, fastest round and best grade, with a "New personal best!" line in chat when you beat one. Saved per character.
+- **Session stats** in the side panel: time, rounds, XP and XP per hour, points and points per hour, rounds per hour and average grade, with a reset button.
 - History is saved per character.
+
+**Ready check**
+- Before the round it makes sure you have a pickaxe (worn or carried), a chisel and 10 uncharged cells. Anything missing becomes the next step, shows in the panels, and is added to the round-start alert.
 
 **Quality of life**
 - Hides Power-up without stones and Place-cell without a cell.

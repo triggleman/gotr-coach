@@ -115,9 +115,14 @@ public class InfoPanelOverlay extends OverlayPanel
 
 	private void timers(GameTracker tracker, Snapshot s)
 	{
-		if (s.phase == GamePhase.WAITING && s.countdownSeconds >= 0)
+		if (s.phase == GamePhase.WAITING || s.phase == GamePhase.ENDED)
 		{
-			line("Rift opens", s.countdownSeconds + "s", SOON);
+			if (s.countdownSeconds >= 0)
+			{
+				line("Rift opens", s.countdownSeconds + "s", SOON);
+			}
+			java.util.List<String> missing = s.missingGear(config.unchargedCellsWanted());
+			line("Ready check", missing.isEmpty() ? "All set" : "Need " + String.join(", ", missing), missing.isEmpty() ? GOOD : NOW);
 			return;
 		}
 		if (!s.inGame())

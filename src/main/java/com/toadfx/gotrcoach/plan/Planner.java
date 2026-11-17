@@ -57,6 +57,16 @@ public final class Planner
 			return Instruction.of(Step.REPAIR_POUCHES, Target.CORDELIA,
 				countdown + "NPC Contact the Dark Mage, or talk to Apprentice Cordelia");
 		}
+		if (!s.hasPickaxe)
+		{
+			return new Instruction(Step.GET_PICKAXE, Target.NONE, null,
+				countdown + "You can't mine fragments without one (inventory or worn)", Urgency.SOON);
+		}
+		if (!s.hasChisel)
+		{
+			return new Instruction(Step.GET_CHISEL, Target.NONE, null,
+				countdown + "Needed to craft essence and build guardians", Urgency.SOON);
+		}
 		if (s.location == Location.LOBBY)
 		{
 			return Instruction.of(Step.ENTER_BARRIER, Target.ENTRANCE_BARRIER, countdown + "Get inside before the rift opens");

@@ -592,6 +592,17 @@ public class GameTracker
 		inventory = Inventory.read(inv == null ? null : inv.getItems());
 		ItemContainer worn = client.getItemContainer(InventoryID.WORN);
 		yewLantern = worn != null && worn.contains(ItemID.ABYSSAL_LANTERN_YEW);
+		if (worn != null && !inventory.pickaxe)
+		{
+			for (net.runelite.api.Item item : worn.getItems())
+			{
+				if (item != null && Inventory.isPickaxe(item.getId()))
+				{
+					inventory.pickaxe = true;
+					break;
+				}
+			}
+		}
 	}
 
 	/** Yew logs in the abyssal lantern raise the total energy cap to 1,320. */

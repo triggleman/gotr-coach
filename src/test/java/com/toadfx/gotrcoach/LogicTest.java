@@ -3,6 +3,8 @@ package com.toadfx.gotrcoach;
 import com.toadfx.gotrcoach.coach.GameRecord;
 import com.toadfx.gotrcoach.coach.GameRecorder;
 import com.toadfx.gotrcoach.coach.Grader;
+import com.toadfx.gotrcoach.coach.PersonalBests;
+import com.toadfx.gotrcoach.coach.Session;
 import com.toadfx.gotrcoach.model.Alignment;
 import com.toadfx.gotrcoach.model.PouchType;
 import com.toadfx.gotrcoach.plan.EnergyMath;
@@ -190,5 +192,56 @@ public class LogicTest
 		GameRecorder copy = new GameRecorder();
 		copy.loadHistory(rec.serializeHistory());
 		assertEquals(1, copy.getHistory().size());
+	}
+
+	@Test
+	public void personalBestsTrackAndPersist()
+	{
+		PersonalBests b = new PersonalBests();
+		GameRecord first = goodRound();
+		Grader.grade(first);
+		assertTrue("first round sets bests silently", b.update(first).isEmpty());
+		assertEquals(880, b.mostEnergy);
+
+		GameRecord better = goodRound();
+		better.energyElemental = 600;
+		better.xpGained = 50_000;
+		better.gameSeconds = 480;
+		Grader.grade(better);
+		java.util.List<String> beaten = b.update(better);
+		assertTrue(beaten.toString(), beaten.stream().anyMatch(t -> t.startsWith("most points")));
+		assertTrue(beaten.toString(), beaten.stream().anyMatch(t -> t.startsWith("most XP")));
+		assertTrue(beaten.toString(), beaten.stream().anyMatch(t -> t.startsWith("fastest round (8:00)")));
+
+		GameRecord late = goodRound();
+		late.joinedLate = true;
+		late.energyElemental = 999;
+		assertTrue(b.update(late).isEmpty());
+
+		PersonalBests back = PersonalBests.parse(b.serialize());
+		assertEquals(b.mostEnergy, back.mostEnergy);
+		assertEquals(b.mostXp, back.mostXp);
+		assertEquals(480, back.fastestWin);
+		assertTrue(PersonalBests.parse("junk").isEmpty());
+	}
+
+	@Test
+	public void sessionRates()
+	{
+		Session s = new Session();
+		assertTrue(s.isEmpty());
+		s.roundStarted(0L);
+		GameRecord r = goodRound();
+		r.xpGained = 40_000;
+		s.add(r);
+		s.add(r);
+		assertEquals(2, s.getRounds());
+		assertEquals(80_000, s.getXp());
+		// Two rounds in 30 minutes: 160k XP/hr and 4 rounds/hr.
+		assertEquals(160_000, Math.round(s.xpPerHour(30 * 60_000L)));
+		assertEquals(4, Math.round(s.roundsPerHour(30 * 60_000L)));
+		assertEquals(0, Math.round(s.xpPerHour(30_000L)));
+		s.reset();
+		assertTrue(s.isEmpty());
 	}
 }

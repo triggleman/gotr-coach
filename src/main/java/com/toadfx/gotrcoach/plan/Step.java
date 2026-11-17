@@ -4,6 +4,8 @@ package com.toadfx.gotrcoach.plan;
 public enum Step
 {
 	OUTSIDE("Go to Guardians of the Rift"),
+	GET_PICKAXE("Get a pickaxe"),
+	GET_CHISEL("Get a chisel"),
 	TAKE_UNCHARGED_CELLS("Take uncharged cells"),
 	TAKE_WEAK_CELL("Take a weak cell"),
 	REPAIR_POUCHES("Repair your pouches"),

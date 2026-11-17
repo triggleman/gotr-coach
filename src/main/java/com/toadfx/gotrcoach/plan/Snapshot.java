@@ -54,7 +54,8 @@ public class Snapshot
 	public int polyStones;
 	public CellTier chargedCell;
 	public int unchargedCells;
-	public boolean hasChisel;
+	public boolean hasChisel = true;
+	public boolean hasPickaxe = true;
 	/** Inventory slots holding runes we crafted (stackable, so slots not runes). */
 	public int runeSlots;
 
@@ -102,6 +103,25 @@ public class Snapshot
 	public int essenceRoom()
 	{
 		return freeSlots + Math.max(0, pouchCapacity - essenceInPouches);
+	}
+
+	/** What's missing for the round: pickaxe, chisel, uncharged cells. Empty when ready. */
+	public java.util.List<String> missingGear(int cellsWanted)
+	{
+		java.util.List<String> out = new java.util.ArrayList<>(3);
+		if (!hasPickaxe)
+		{
+			out.add("pickaxe");
+		}
+		if (!hasChisel)
+		{
+			out.add("chisel");
+		}
+		if (unchargedCells < cellsWanted)
+		{
+			out.add((cellsWanted - unchargedCells) + " uncharged cells");
+		}
+		return out;
 	}
 
 	public boolean inGame()
